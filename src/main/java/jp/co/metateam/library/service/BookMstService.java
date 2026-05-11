@@ -42,7 +42,24 @@ public class BookMstService {
 
         return bookMstDtoList;
     }
-    
+
+
+ public boolean save(BookMstDto dto) {
+
+    // ISBN重複チェック
+    if (bookMstRepository.existsByIsbn(dto.getIsbn())) {
+        return false;
+    }
+
+    BookMst entity = new BookMst();
+    entity.setTitle(dto.getTitle());
+    entity.setIsbn(dto.getIsbn());
+
+    bookMstRepository.save(entity);
+
+    return true;
+}
+
 }
 
 
