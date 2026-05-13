@@ -2,15 +2,10 @@ package jp.co.metateam.library.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import io.micrometer.common.util.StringUtils;
 import jp.co.metateam.library.model.BookMst;
 import jp.co.metateam.library.model.BookMstDto;
 import jp.co.metateam.library.repository.BookMstRepository;
@@ -19,12 +14,12 @@ import jp.co.metateam.library.repository.BookMstRepository;
 public class BookMstService {
 
     private final BookMstRepository bookMstRepository;
-    
+
     @Autowired
-    public BookMstService(BookMstRepository bookMstRepository){
+    public BookMstService(BookMstRepository bookMstRepository) {
         this.bookMstRepository = bookMstRepository;
     }
-    
+
     public List<BookMstDto> findAvailableWithStockCount() {
         List<BookMst> books = this.bookMstRepository.findLimitedBook();
         List<BookMstDto> bookMstDtoList = new ArrayList<BookMstDto>();
@@ -43,24 +38,17 @@ public class BookMstService {
         return bookMstDtoList;
     }
 
+    public boolean save(BookMstDto dto) {
+        if (bookMstRepository.existsByIsbn(dto.getIsbn())) {
+            return false;
+        }
+        BookMst entity = new BookMst();
+        // 画面データ（DTO）をDB用データ（Entity）に変換
+        entity.setTitle(dto.getTitle());
+        entity.setIsbn(dto.getIsbn());
+        // DBに保存
+        bookMstRepository.save(entity);
 
- public boolean save(BookMstDto dto) {
-
-    // ISBN重複チェック
-    if (bookMstRepository.existsByIsbn(dto.getIsbn())) {
-        return false;
+        return true;
     }
-
-    BookMst entity = new BookMst();
-    entity.setTitle(dto.getTitle());
-    entity.setIsbn(dto.getIsbn());
-
-    bookMstRepository.save(entity);
-
-    return true;
 }
-
-}
-
-
-

@@ -8,12 +8,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
-import jp.co.metateam.library.model.BookMst;
 import jp.co.metateam.library.model.BookMstDto;
 import jp.co.metateam.library.service.BookMstService;
 import lombok.extern.log4j.Log4j2;
@@ -51,22 +48,18 @@ public class BookController {
         return "book/add";
     }
 
-@PostMapping("/book/add")
-public String register(@Valid @ModelAttribute BookMstDto dto,
-                       BindingResult result) {
+    @PostMapping("/book/add")
+    public String register(@Valid @ModelAttribute BookMstDto dto,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return "book/add";
+        }
 
-    if (result.hasErrors()) {
-        return "book/add";
+        if (!bookMstService.save(dto)) {
+            result.rejectValue("isbn", "", "登録済みのISBNです");
+            return "book/add";
+        }
+
+        return "redirect:/book/index";
     }
-
-    // 保存失敗（ISBN重複）
-    if (!bookMstService.save(dto)) {
-        result.rejectValue("isbn", "", "登録済みのISBNです");
-        return "book/add";
-    }
-
-    // 保存成功
-    return "redirect:/book/index";
-}
-
 }
